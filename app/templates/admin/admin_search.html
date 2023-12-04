@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資料查詢</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center display-4 mb-4">資料查詢</h1>
+
+        <form action="/admin/search/result" method="post" class="text-center">
+            <div class="mb-3">
+                <label for="table" class="form-label">選擇表：</label>
+                <select name="table" id="table" class="form-select" onchange="updateColumns()">
+                    <option value="">請選擇</option>
+                    {% for table in tables %}
+                    <option value="{{ table }}">{{ table }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="columns" class="form-label">選擇查詢欄位：</label>
+                <select name="columns" id="columns" class="form-select">
+                    <option value="">請先選擇表</option>
+                    {% for column in columns %}
+                    <option value="{{ column }}">{{ column }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="category" class="form-label">選擇搜尋欄位：</label>
+                <select name="category" id="category" class="form-select" onchange="updateData()">
+                    <option value="">請先選擇表</option>
+                    {% for category in categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="item" class="form-label">選擇資料：</label>
+                <select name="item" id="item" class="form-select">
+                    <option value="">請先選擇查詢項目</option>
+                    {% for item in items %}
+                    <option value="{{ item }}">{{ item }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary">查詢</button>
+        </form>
+
+        <form action="/" class="text-center mt-3">
+            <button type="submit" class="btn btn-secondary">回首頁</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS (optional, for some features like dropdowns) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function updateColumns() {
+            var selectedTable = document.getElementById("table").value;
+            var columnsSelect = document.getElementById("columns");
+            var categorySelect = document.getElementById("category");
+            // AJAX request to get columns based on selected table
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/admin/search/get_columns?table=" + selectedTable, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var columns = JSON.parse(xhr.responseText);
+                    // Clear existing options
+                    columnsSelect.innerHTML = "";
+
+                    // Add new options
+                    var allColumnsOption = document.createElement("option");
+                    allColumnsOption.text = '請選擇'
+                    columnsSelect.add(allColumnsOption);
+
+                    columns.forEach(function (column) {
+                        var option = document.createElement("option");
+                        option.value = column;
+                        option.text = column;
+                        columnsSelect.add(option);
+                    });
+                }
+            };
+
+            xhr.send();
+
+            var xhr2 = new XMLHttpRequest();
+            xhr2.open("GET", "/admin/search/get_columns?table=" + selectedTable, true);
+
+            xhr2.onreadystatechange = function () {
+                if (xhr2.readyState == 4 && xhr2.status == 200) {
+                    var columns = JSON.parse(xhr2.responseText);
+
+                    // Clear existing options
+                    categorySelect.innerHTML = "";
+
+                    // Add new options
+                    var allColumnsOption = document.createElement("option");
+                    allColumnsOption.text = '請選擇'
+                    categorySelect.add(allColumnsOption);
+
+                    columns.forEach(function (column) {
+                        var option = document.createElement("option");
+                        option.value = column;
+                        option.text = column;
+                        categorySelect.add(option);
+                    });
+                }
+            };
+
+            xhr2.send();
+           
+        }
+        function updateData() {
+            var selectedTable = document.getElementById("table").value;
+            var selectedCategory = document.getElementById("category").value;
+            var itemSelect = document.getElementById("item");
+
+            // AJAX request to get category based on selected table
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/admin/search/get_category/" + selectedCategory + "?table=" + selectedTable, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var category = JSON.parse(xhr.responseText);
+                    // Clear existing options
+                    itemSelect.innerHTML = "";
+
+                    // Add new options
+                    var allcategoryOption = document.createElement("option");
+                    allcategoryOption.text = '請選擇'
+                    itemSelect.add(allcategoryOption);
+
+                    category.forEach(function (category) {
+                        var option = document.createElement("option");
+                        option.value = category;
+                        option.text = category;
+                        itemSelect.add(option);
+                    });
+                }
+            };
+
+            xhr.send();
+        }
+        
+    </script>
+</body>
+</html>

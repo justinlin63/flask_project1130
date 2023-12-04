@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商店</title>
+    <!-- 引入 Bootstrap CSS 文件，启用响应式间距 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: #ffffff;
+        }
+        .navbar {
+            background-color: #ffffff;
+        }
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .card {
+            border: none;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .card-img-top {
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+        .card-title {
+            color: #333333;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .btn-outline-dark {
+            border-color: #343a40;
+        }
+        .btn-outline-dark:hover {
+            background-color: #343a40;
+            border-color: #343a40;
+        }
+        footer {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+        .product-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .quantity-control {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .input-group {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="sticky-header navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container px-4 px-lg-5">
+                <a class="navbar-brand" href="/">商店</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">商店</a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="/?all=yes">所有商品</a></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li><a class="dropdown-item" href="/">熱門商品</a></li>
+                                <li><a class="dropdown-item" href="/?new=yes">新上架商品</a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item"><a class="nav-link active" aria-current="page" href="/">首頁</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/orders">歷史訂單</a></li>
+                        {% if admin %}
+                            <li class="nav-item"><a class="nav-link" href="/admin">管理</a></li>
+                        {% endif %}
+                    </ul>
+
+                    <form class="d-flex ml-auto" action="/cart">
+                        <button class="btn btn-outline-dark me-2 mb-2 mb-lg-0" type="submit">
+                            <i class="bi-cart-fill me-1"></i>
+                            購物車
+                            <span class="badge bg-dark text-white ms-1 rounded-pill">{{cart_num}}</span>
+                        </button>
+                    </form>
+                    {% if login %}
+                        <a class="btn btn-outline-dark" href="/profile">帳號</a>
+                    {% else %}
+                        <a class="btn btn-outline-dark" href="/login">登入</a>
+                    {% endif %}
+                </div>
+            </div>
+    </nav>
+
+    <!-- 頁首 -->
+    <header class="bg-dark py-5">
+            <div class="container px-4 px-lg-5 my-5">
+                <div class="text-center text-white">
+                    <h1 class="display-4 fw-bolder">商店</h1>
+                    <p class="lead fw-normal text-white-50 mb-0">購買您想要的商品</p>
+                </div>
+            </div>
+    </header>
+
+    <!-- 產品卡片區 -->
+    <section class="py-5">
+        <div class="container px-4 px-lg-5 mt-5">
+            <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center product-container">
+                {% if product_list %}
+                    {% for product in product_list %}
+                        <div class="col mb-5">
+                            <div class="card h-100">
+                                <img class="card-img-top" src="{{ product[0] }}" alt="Product Image"/>
+                                <div class="card-body p-4">
+                                    <div class="text-center">
+                                        <h5 class="card-title fw-bolder">{{ product[1] }}</h5>
+                                        ${{ product[2] }}
+                                    </div>
+                                </div>
+                                <div class="card-footer bg-transparent border-top-0 text-center">
+                                    <form action="/cart/join" method="POST" class="d-flex justify-content-center align-items-center flex-column">
+                                        <input type="hidden" name="product_id" value="{{product[3]}}">
+                                        <div class="quantity-control mb-3">
+                                            <div class="input-group">
+                                                <button type="button" class="btn btn-outline-dark" onclick="if(this.nextElementSibling.value > 1) { this.nextElementSibling.value-- }">-</button>
+                                                <input class="form-control text-center centered-input" type="number" name="quantity" value="1" min="1" max="100" style="max-width: 60px;text-align: right" readonly />
+                                                <button type="button" class="btn btn-outline-dark" onclick="if(this.previousElementSibling.value < 100) { this.previousElementSibling.value++ }">+</button>
+                                            </div>
+                                        </div>
+                                        <div class="d-grid mt-3">
+                                            <button type="submit" class="btn btn-outline-dark ms-2 d-block mx-auto" style="width: 150px;">加入購物車</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+    </section>
+
+    <!-- 頁尾 -->
+    <footer class="py-5 bg-dark">
+        <div class="container"><p class="m-0 text-center text-white">版權所有 &copy; Justin's 商店 2023</p></div>
+    </footer>
+
+    <!-- 引入 Bootstrap 5 相關的 JS 檔案 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

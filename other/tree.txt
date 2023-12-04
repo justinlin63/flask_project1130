@@ -1,0 +1,68 @@
+flask_project1130/
+|-- app/
+|   |-- functions/
+|   |   |-- admin/
+|   |   |   |-- __init__.py
+|   |   |   |-- route.py
+|   |   |   |-- use_model.py
+|   |   |-- cart/
+|   |   |   |-- __init__.py
+|   |   |   |-- route.py
+|   |   |   |-- use_model.py
+|   |   |-- home/
+|   |   |   |-- __init__.py
+|   |   |   |-- route.py
+|   |   |   |-- use_model.py
+|   |   |-- login/
+|   |   |   |-- __init__.py
+|   |   |   |-- route.py
+|   |   |   |-- use_model.py
+|   |   |-- models/
+|   |   |   |-- sql_connect.py
+|   |   |   |-- sql_setting.py
+|   |   |   |-- useful_string.py
+|   |   |   |-- user.py
+|   |   |-- orders/
+|   |   |   |-- __init__.py
+|   |   |   |-- route.py
+|   |   |   |-- use_model.py
+|   |   |-- pay/
+|   |   |   |-- __init__.py
+|   |   |   |-- route.py
+|   |   |   |-- use_model.py
+|   |   |-- register/
+|   |   |   |-- __init__.py
+|   |   |   |-- route.py
+|   |   |   |-- use_model.py
+|   |   |-- reset_password/
+|   |   |   |-- __init__.py
+|   |   |   |-- route.py
+|   |   |   |-- use_model.py
+|   |   |-- __init__.py
+|   |-- static/
+|   |   |-- product/
+|   |   |   |-- 1.png
+|   |-- templates/
+|   |   |-- admin/
+|   |   |   |-- admin.html
+|   |   |   |-- admin_search.html
+|   |   |   |-- admin_search_result.html
+|   |   |   |-- product_image.html
+|   |   |-- cart/
+|   |   |   |-- cart.html
+|   |   |-- home/
+|   |   |   |-- home.html
+|   |   |-- login/
+|   |   |   |-- login.html
+|   |   |-- orders/
+|   |   |   |-- orders.html
+|   |   |-- pay/
+|   |   |   |-- pay.html
+|   |   |-- register/
+|   |   |   |-- register.html
+|   |   |-- reset_password/
+|   |   |   |-- reset_password.html
+|   |   |   |-- reset_password_new_pasword.html
+|   |-- __init__.py
+|   |-- config.py
+|-- run.py

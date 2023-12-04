@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <title>照片上傳</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+            <style>
+                body {
+                    padding: 20px;
+                    background-color: #f8f9fa;
+                }
+                .container {
+                    max-width: 400px;
+                    margin: 0 auto;
+                    background-color: #fff;
+                    border-radius: 5px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                    padding: 40px;
+                }
+                .container h1 {
+                    text-align: center;
+                    margin-bottom: 30px;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>照片上傳</h1>
+                <form method="POST" action="/admin/product/add/image" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="file">選擇照片檔案：</label>
+                        <input type="file" class="form-control-file" id="file" name="file">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">上傳</button>
+                    <input type="hidden" name="product_id" value="{{product_id}}">
+                </form>
+            </div>
+        
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+        </body>
+        </html>
