@@ -157,10 +157,10 @@ def orders_deliver(id):
 def admin_search():
     if current_user.role == 'admin':
         conn = mysql.connector.connect(
-            host='192.168.1.110',  # 主機名稱
-            database=db,  # 資料庫名稱
-            user='root',  # 帳號
-            password='admin')  # 密碼
+            host=Configs.host,  # 主機名稱
+            database=Configs.database,  # 資料庫名稱
+            user=Configs.user,  # 帳號
+            password=Configs.password)  # 密碼
         cursor = conn.cursor()
         cursor.execute("SHOW TABLES")
         tables = [row[0] for row in cursor.fetchall()]
@@ -174,10 +174,10 @@ def admin_search_get_columns():
     selected_table = request.args.get('table')
     if current_user.role == 'admin':
         conn = mysql.connector.connect(
-            host='192.168.1.110',  # 主機名稱
-            database=db,  # 資料庫名稱
-            user='root',  # 帳號
-            password='admin')  # 密碼
+            host=Configs.host,  # 主機名稱
+            database=Configs.database,  # 資料庫名稱
+            user=Configs.user,  # 帳號
+            password=Configs.password)  # 密碼
         cursor = conn.cursor()
         cursor.execute("SHOW COLUMNS FROM {}".format(selected_table))
         columns = [row[0] for row in cursor.fetchall()]
@@ -190,10 +190,10 @@ def admin_search_get_columns():
 def admin_search_get_category(category):
     if current_user.role == 'admin':
         conn = mysql.connector.connect(
-            host='192.168.1.110',  # 主機名稱
-            database=db,  # 資料庫名稱
-            user='root',  # 帳號
-            password='admin')  # 密碼
+            host=Configs.host,  # 主機名稱
+            database=Configs.database,  # 資料庫名稱
+            user=Configs.user,  # 帳號
+            password=Configs.password)  # 密碼
         cursor = conn.cursor()
         selected_table = request.args.get('table')
         cursor.execute("SELECT {} FROM {}".format(category, selected_table))
@@ -208,10 +208,10 @@ def admin_search_get_category(category):
 def result():
     if current_user.role == 'admin':
         conn = mysql.connector.connect(
-            host='192.168.1.110',  # 主機名稱
-            database=db,  # 資料庫名稱
-            user='root',  # 帳號
-            password='admin')  # 密碼
+            host=Configs.host,  # 主機名稱
+            database=Configs.database,  # 資料庫名稱
+            user=Configs.user,  # 帳號
+            password=Configs.password)  # 密碼
         cursor = conn.cursor()
         selected_table = request.form.get('table')
         selected_category = request.form.get('category')

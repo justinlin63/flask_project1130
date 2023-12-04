@@ -1,10 +1,11 @@
 import mysql.connector
+from app.config import Configs
 
 conn = mysql.connector.connect(
-    host='192.168.1.110',  # 主機名稱
-    database='flask_project1130',  # 資料庫名稱
-    user='root',  # 帳號
-    password='admin')  # 密碼
+    host=Configs.host,  # 主機名稱
+    database=Configs.database,  # 資料庫名稱
+    user=Configs.user,  # 帳號
+    password=Configs.password)  # 密碼
 cursor = conn.cursor()
 # 連接資料庫
 # 建立使用者資料表
