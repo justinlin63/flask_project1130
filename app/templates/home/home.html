@@ -64,6 +64,7 @@
             max-width: 200px;
             margin: 0 auto;
         }
+
     </style>
 </head>
 <body>
@@ -72,6 +73,7 @@
             <div class="container px-4 px-lg-5">
                 <a class="navbar-brand" href="/">商店</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
                         <li class="nav-item dropdown">
@@ -89,6 +91,11 @@
                             <li class="nav-item"><a class="nav-link" href="/admin">管理</a></li>
                         {% endif %}
                     </ul>
+
+                    <form class="d-flex ms-auto" action="/search" method="GET">
+                        <input class="form-control me-2" type="search" placeholder="搜尋商品" aria-label="Search" name="q" style="height: 35px;">
+                        <button class="btn btn-outline-dark me-2" type="submit" style="height: 35px;width: 70px;">搜尋</button>
+                    </form>
 
                     <form class="d-flex ml-auto" action="/cart">
                         <button class="btn btn-outline-dark me-2 mb-2 mb-lg-0" type="submit">
@@ -149,6 +156,8 @@
                             </div>
                         </div>
                     {% endfor %}
+                {% else %}
+                    <h4 style="text-align: center">{{info}}</h4>
                 {% endif %}
             </div>
         </div>

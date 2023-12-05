@@ -3,20 +3,24 @@ from app.config import Configs
 
 
 def sql_search(table: str, columns: str = "*", where: str = None, where_value=None, fetch: str = "one",
-               order_by: str = None, order_method: str = None):
+               order_by: str = None, order_method: str = None, like: bool = False):
     try:
         with connect(host=Configs.host, database=Configs.database, user=Configs.user,
                      password=Configs.password, use_pure=True) as conn:
             cursor = conn.cursor(named_tuple=True)
             query = f'SELECT {columns} FROM {table}'
             if where:
-                query += f" WHERE {where} = {where_value}"
+                if like:
+                    query += f" WHERE {where} LIKE {where_value}"
+                else:
+                    query += f" WHERE {where} = {where_value}"
+                print(query)
                 cursor.execute(query)
             else:
                 if order_by:
                     query += f' ORDER BY {order_by} {order_method}'
+                print(query)
                 cursor.execute(query)
-            # print(query)
             if fetch == 'all':
                 result = cursor.fetchall()
                 return result

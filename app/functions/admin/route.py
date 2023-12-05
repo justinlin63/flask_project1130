@@ -22,7 +22,7 @@ def product_add():
         if request.method == 'POST':
             input_name = request.form['name']
             input_price = request.form['price']
-            sql_insert(ufstr.products(), 'name,price', f'{ufstr.db_string(input_name)},{input_price}')
+            sql_insert(ufstr.products(), 'name,price,hot', f'{ufstr.db_string(input_name)},{input_price},1')
             product_id = sql_search(ufstr.products(), ufstr.id(), ufstr.name(), ufstr.db_string(input_name))
             print(product_id)
             return render_template('product_image.html', product_id=product_id)

@@ -3,7 +3,7 @@ from . import home_blueprint
 
 
 @home_blueprint.route('/')
-def home():
+def home(search=False, where=False):
     new = request.args.get('new')
     all_ = request.args.get('all')
     order_by = ufstr.hot()
@@ -14,7 +14,7 @@ def home():
     if all_:
         order_by = ufstr.id()
         order_method = 'ASC'
-    result = sql_search("products", ufstr.star(), order_by=order_by, order_method=order_method, fetch="all")
+    result = sql_search("products", ufstr.star(), order_by=order_by, order_method=order_method, fetch="all", where=where, where_value=search, like=True)
     product_list = []
     for i in result:
         product = []
@@ -38,7 +38,22 @@ def home():
             admin = 1
         cart_num = len(sql_search('cart', "*", 'user_id', current_user.id, fetch='all'))
         login = 1
-    return render_template('home.html', product_list=product_list, cart_num=cart_num, admin=admin, login=login)
+    if len(product_list) == 0:
+        info = f'沒有 "{search.split("%")[1]}" 的相關產品'
+    else:
+        info = 0
+    return render_template('home.html', product_list=product_list, cart_num=cart_num, admin=admin, login=login, info=info)
+
+
+@home_blueprint.route('/search')
+def search_product():
+    search = request.args.get('q')
+    if search == '':
+        where = False
+    else:
+        search = ufstr.db_string(f'%{search}%')
+        where = ufstr.name()
+    return home(search=search, where=where)
 
 
 @home_blueprint.route('/profile')
