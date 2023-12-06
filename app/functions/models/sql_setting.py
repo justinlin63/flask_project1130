@@ -64,5 +64,6 @@ cursor.execute('''
         status varchar(50) NOT NULL
     )
 ''')
+
 conn.commit()
 conn.close()

@@ -31,6 +31,10 @@ class String:
         return "products"
 
     @staticmethod
+    def product_order():
+        return 'product_order'
+
+    @staticmethod
     def password():
         return "password"
 
@@ -73,6 +77,10 @@ class String:
     @staticmethod
     def star():
         return "*"
+
+    @staticmethod
+    def order_num():
+        return "order_num"
 
     @staticmethod
     def db_string(string):

@@ -1,8 +1,5 @@
 from app.functions.admin.use_model import *
 from . import admin_blueprint
-import mysql.connector
-
-db = Configs.database
 
 
 @admin_blueprint.route('/')
@@ -22,7 +19,7 @@ def product_add():
         if request.method == 'POST':
             input_name = request.form['name']
             input_price = request.form['price']
-            sql_insert(ufstr.products(), 'name,price,hot', f'{ufstr.db_string(input_name)},{input_price},1')
+            sql_insert(ufstr.products(), 'name,price,hot,product_order', f'{ufstr.db_string(input_name)},{input_price},1')
             product_id = sql_search(ufstr.products(), ufstr.id(), ufstr.name(), ufstr.db_string(input_name))
             print(product_id)
             return render_template('product_image.html', product_id=product_id)
@@ -49,10 +46,10 @@ def admin_orders():
     if current_user.role == 'admin':
         user = sql_search(ufstr.orders(), ufstr.star(), fetch=ufstr.all())
         orders = []
-        for x in user:
-            if x.status == 'confirm':
-                a = {'order_id': x.id, 'products': []}
-                i = x.product_id.split(',')
+        for info in user:
+            if info.status == 'confirm':
+                a = {'order_id': info.id, 'products': []}
+                i = info.product_id.split(',')
                 total_price = 0
                 for w in i:
                     index = i.index(w)
@@ -60,7 +57,7 @@ def admin_orders():
                     if w != '':
                         w = int(w)
                     xx = sql_search('products', "*", 'id', w)
-                    q = sql_search('orders', "*", 'id', x.id)
+                    q = sql_search('orders', "*", 'id', info.id)
                     q = str(q.quantity).split(',')
                     d['product_id'] = xx.id
                     d['name'] = xx.name
@@ -68,10 +65,10 @@ def admin_orders():
                     d['quantity'] = q[index]
                     total_price += int(d['price']) * int(d['quantity'])
                     a['products'].append(d)
-                a['buyer'] = x.username
+                a['buyer'] = info.username
                 a['total_price'] = total_price
-                a['cancel_url'] = '/admin/orders/cancel/' + str(x.id)
-                a['deliver_url'] = '/admin/orders/deliver/' + str(x.id)
+                a['cancel_url'] = '/admin/orders/cancel/' + str(info.id)
+                a['deliver_url'] = '/admin/orders/deliver/' + str(info.id)
                 a['status'] = '待處理'
                 orders.append(a)
         return render_template('orders.html', orders=orders, admin_bool=1)
@@ -84,16 +81,16 @@ def admin_all_orders():
     if current_user.role == 'admin':
         user = sql_search(ufstr.orders(), ufstr.star(), fetch=ufstr.all())
         orders = []
-        for x in user:
-            a = {'order_id': x.id, 'products': []}
-            i = x.product_id.split(',')
+        for info in user:
+            a = {'order_id': info.id, 'products': []}
+            i = info.product_id.split(',')
             total_price = 0
             for w in i:
                 index = i.index(w)
                 d = {}
                 w = int(w)
                 xx = sql_search('products', "*", 'id', w)
-                q = sql_search('orders', "*", 'id', x.id)
+                q = sql_search('orders', "*", 'id', info.id)
                 q = str(q.quantity).split(',')
                 d['quantity'] = q[index]
                 d['product_id'] = xx.id
@@ -101,12 +98,12 @@ def admin_all_orders():
                 d['price'] = xx.price
                 total_price += int(d['price']) * int(d['quantity'])
                 a['products'].append(d)
-            a['buyer'] = x.username
+            a['buyer'] = info.username
             a['total_price'] = total_price
-            a['cancel_url'] = '/admin/orders/cancel/' + str(x.id)
-            a['deliver_url'] = '/admin/orders/deliver/' + str(x.id)
+            a['cancel_url'] = '/admin/orders/cancel/' + str(info.id)
+            a['deliver_url'] = '/admin/orders/deliver/' + str(info.id)
             r = ''
-            status = x.status
+            status = info.status
             if status == 'deliver':
                 r = '已出貨'
             elif status == 'cancel':
@@ -132,9 +129,9 @@ def admin_orders_cancel(id):
         input_username = cart.username
         if cart.product_id:
             for i in cart_split:
-                x = sql_search(ufstr.products(), ufstr.star(), ufstr.id(), int(i))
-                if x:
-                    sum_money += int(x.price) * int(quantity_split[cart_split.index(i)])
+                info = sql_search(ufstr.products(), ufstr.star(), ufstr.id(), int(i))
+                if info:
+                    sum_money += int(info.price) * int(quantity_split[cart_split.index(i)])
         user = sql_search(ufstr.users(), ufstr.star(), ufstr.username(), ufstr.db_string(input_username))
         store = sql_search(ufstr.users(), ufstr.star(), ufstr.username(), ufstr.db_string('store'))
         user_money = int(user.money) + int(sum_money)
@@ -156,15 +153,8 @@ def orders_deliver(id):
 @login_required
 def admin_search():
     if current_user.role == 'admin':
-        conn = mysql.connector.connect(
-            host=Configs.host,  # 主機名稱
-            database=Configs.database,  # 資料庫名稱
-            user=Configs.user,  # 帳號
-            password=Configs.password)  # 密碼
-        cursor = conn.cursor()
-        cursor.execute("SHOW TABLES")
-        tables = [row[0] for row in cursor.fetchall()]
-        conn.close()
+        result = sql_execute_search("SHOW TABLES")
+        tables = [row[0] for row in result]
         return render_template('admin_search.html', tables=tables)
 
 
@@ -173,15 +163,8 @@ def admin_search():
 def admin_search_get_columns():
     selected_table = request.args.get('table')
     if current_user.role == 'admin':
-        conn = mysql.connector.connect(
-            host=Configs.host,  # 主機名稱
-            database=Configs.database,  # 資料庫名稱
-            user=Configs.user,  # 帳號
-            password=Configs.password)  # 密碼
-        cursor = conn.cursor()
-        cursor.execute("SHOW COLUMNS FROM {}".format(selected_table))
-        columns = [row[0] for row in cursor.fetchall()]
-        conn.close()
+        result = sql_execute_search("SHOW COLUMNS FROM {}".format(selected_table))
+        columns = [row[0] for row in result]
         return jsonify(columns)
 
 
@@ -189,39 +172,23 @@ def admin_search_get_columns():
 @login_required
 def admin_search_get_category(category):
     if current_user.role == 'admin':
-        conn = mysql.connector.connect(
-            host=Configs.host,  # 主機名稱
-            database=Configs.database,  # 資料庫名稱
-            user=Configs.user,  # 帳號
-            password=Configs.password)  # 密碼
-        cursor = conn.cursor()
         selected_table = request.args.get('table')
-        cursor.execute("SELECT {} FROM {}".format(category, selected_table))
-        category = [row[0] for row in cursor.fetchall()]
+        result = sql_execute_search("SELECT {} FROM {}".format(category, selected_table))
+        category = [row[0] for row in result]
         category.sort()
-        conn.close()
         return jsonify(category)
 
 
 @admin_blueprint.route('/search/result', methods=['POST'])
 @login_required
-def result():
+def admin_search_result():
     if current_user.role == 'admin':
-        conn = mysql.connector.connect(
-            host=Configs.host,  # 主機名稱
-            database=Configs.database,  # 資料庫名稱
-            user=Configs.user,  # 帳號
-            password=Configs.password)  # 密碼
-        cursor = conn.cursor()
         selected_table = request.form.get('table')
         selected_category = request.form.get('category')
         selected_column = request.form.get('columns')
         selected_item = request.form.get('item')
         # 使用選擇的值查詢 MySQL 數據
-        query = "SELECT {} FROM {} WHERE {} = %s".format(selected_column, selected_table, selected_category)
-        cursor.execute(query, (selected_item,))
-        results = cursor.fetchall()
-        conn.close()
+        results = sql_execute_search("SELECT {} FROM {} WHERE {} = {}".format(selected_column, selected_table, selected_category, f'"{selected_item}"'))
         return render_template('admin_search_result.html', selected_table=selected_table,
                                selected_category=selected_category, selected_columns=selected_column,
                                results=results)

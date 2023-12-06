@@ -81,3 +81,18 @@ def sql_delete(table: str, where: str, where_value):
     except Error as e:
         print(f"Error: {e}")
     return False
+
+
+def sql_execute_search(text: str):
+    try:
+        with connect(host=Configs.host, database=Configs.database, user=Configs.user,
+                     password=Configs.password, use_pure=True) as conn:
+            cursor = conn.cursor()
+            query = str(text)
+            print(query)
+            cursor.execute(query)
+            result = cursor.fetchall()
+            return result
+    except Error as e:
+        print(f"Error: {e}")
+        return False
