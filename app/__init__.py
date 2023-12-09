@@ -16,7 +16,6 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        # Replace this with your actual user loading logic
         from app.functions.models.user import get_user_by_id
         return get_user_by_id(user_id)
     return app

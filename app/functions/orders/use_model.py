@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect
+from flask import Blueprint, render_template, redirect, request
 from random import randint
 from app.config import *
 from app.functions.models.sql_connect import *

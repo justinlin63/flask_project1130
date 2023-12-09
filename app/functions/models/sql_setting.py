@@ -3,9 +3,22 @@ from app.config import Configs
 
 conn = mysql.connector.connect(
     host=Configs.host,  # 主機名稱
+    user=Configs.user,  # 帳號
+    password=Configs.password,  # 密碼
+    use_pure=True)
+cursor = conn.cursor()
+cursor.execute('''
+    CREATE SCHEMA IF NOT EXISTS flask_project1130
+    ''')
+conn.commit()
+conn.close()
+
+conn = mysql.connector.connect(
+    host=Configs.host,  # 主機名稱
     database=Configs.database,  # 資料庫名稱
     user=Configs.user,  # 帳號
-    password=Configs.password)  # 密碼
+    password=Configs.password,  # 密碼
+    use_pure=True)
 cursor = conn.cursor()
 # 連接資料庫
 # 建立使用者資料表
@@ -20,6 +33,9 @@ cursor.execute('''
         money int NOT NULL
     )
 ''')
+cursor.execute('SELECT * FROM users')
+if not cursor.fetchall():
+    cursor.execute("INSERT INTO users (username, password, role, email,reset_password_token,money) VALUES ('store','0','admin','store@store','0','0')")
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS cart (
         id int PRIMARY KEY AUTO_INCREMENT NOT NULL,
@@ -48,7 +64,18 @@ cursor.execute('''
         id int PRIMARY KEY AUTO_INCREMENT NOT NULL,
         name varchar(45) NOT NULL,
         price INT NOT NULL,
+        product_type VARCHAR(1000) NOT NULL ,
         hot INT NOT NULL
+    )
+''')
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS suggest_order (
+        user_id INT PRIMARY KEY NOT NULL UNIQUE ,
+        electronic INT NOT NULL,
+        food INT NOT NULL, 
+        home_appliances INT NOT NULL ,
+        clothing INT NOT NULL ,
+        other INT NOT NULL 
     )
 ''')
 cursor.execute('''

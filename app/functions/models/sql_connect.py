@@ -14,12 +14,12 @@ def sql_search(table: str, columns: str = "*", where: str = None, where_value=No
                     query += f" WHERE {where} LIKE {where_value}"
                 else:
                     query += f" WHERE {where} = {where_value}"
-                print(query)
+                # print(query)
                 cursor.execute(query)
             else:
                 if order_by:
                     query += f' ORDER BY {order_by} {order_method}'
-                print(query)
+                # print(query)
                 cursor.execute(query)
             if fetch == 'all':
                 result = cursor.fetchall()
@@ -59,9 +59,9 @@ def sql_update(table: str, columns: str, value, where: str, where_value):
                      password=Configs.password, use_pure=True) as conn:
             cursor = conn.cursor()
             query = f'UPDATE {table} SET {columns} = {value} WHERE {where} = {where_value}'
+            # print(query)
             cursor.execute(query)
             conn.commit()
-
             return True
     except Error as e:
         print(f"Error: {e}")
@@ -83,15 +83,15 @@ def sql_delete(table: str, where: str, where_value):
     return False
 
 
-def sql_execute_search(text: str):
+def sql_execute(text: str):
     try:
         with connect(host=Configs.host, database=Configs.database, user=Configs.user,
                      password=Configs.password, use_pure=True) as conn:
             cursor = conn.cursor()
             query = str(text)
-            print(query)
             cursor.execute(query)
             result = cursor.fetchall()
+            conn.commit()
             return result
     except Error as e:
         print(f"Error: {e}")

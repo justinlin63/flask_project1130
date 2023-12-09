@@ -77,6 +77,15 @@
                 <label for="price" class="form-label">價格:</label>
                 <input type="text" id="price" name="price" required class="form-control">
             </div>
+            <div class="mb-3">
+                <label for="type" class="form-label">選擇類型：</label>
+                <select name="type" id="type" class="form-select" required>
+                    <option value="">請選擇</option>
+                    {% for type in types %}
+                        <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
             <input type="submit" value="新增" class="btn btn-primary btn-lg">
         </form>
         <hr>

@@ -8,17 +8,20 @@ def login():
         username = request.form['username']
         password = request.form['password']
         password_correct = sql_search('users', 'password', 'username', f'"{username}"', 'one')
-        if check_password_hash(password_correct, password):
-            user_id = sql_search('users', 'id', 'username', f'"{username}"', 'one')
-            role = sql_search(ufstr.users(), ufstr.role(), ufstr.id(), user_id)
-            user = User(user_id, username, role)
-            login_user(user)
-            next_url = request.args.get('next')
-            if next_url == '/logout':
-                next_url = None
-            return redirect(next_url or url_for('home_blueprint.home'))
+        if password_correct:
+            if check_password_hash(password_correct, password):
+                user_id = sql_search('users', 'id', 'username', f'"{username}"', 'one')
+                role = sql_search(ufstr.users(), ufstr.role(), ufstr.id(), user_id)
+                user = User(user_id, username, role)
+                login_user(user)
+                next_url = request.args.get('next')
+                if next_url == '/logout':
+                    next_url = None
+                return redirect(next_url or url_for('home_blueprint.home'))
+            else:
+                return redirect('/redirect/密碼錯誤')
         else:
-            return redirect('/redirect/密碼錯誤')
+            return redirect('/redirect/使用者不存在')
     next_url = request.args.get('next')
     return render_template('login.html', url=next_url)
 

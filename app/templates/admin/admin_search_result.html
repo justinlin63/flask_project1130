@@ -44,11 +44,13 @@
         </div>
 
         <table class="table table-bordered table-hover">
+            {% if results %}
             <thead class="table-primary">
                 <tr>
                     <th>{{ selected_columns }}</th>
                 </tr>
             </thead>
+
             <tbody>
                 {% for row in results %}
                     <tr>
@@ -58,10 +60,18 @@
                     </tr>
                 {% endfor %}
             </tbody>
-        </table>
 
-        <form action="/admin/search" class="text-center">
-            <input type="submit" class="btn btn-primary" value="回上頁">
+        </table>
+        {% else %}
+            <h5 style="text-align:center">無</h5>
+        {% endif %}
+
+        <form action="/admin/search">
+            <div class="text-center">
+                <input type="submit" class="btn btn-primary" value="回上頁" style="text-align:center">
+            </div>
+
+
         </form>
     </div>
 

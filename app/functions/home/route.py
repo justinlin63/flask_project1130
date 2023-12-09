@@ -1,3 +1,5 @@
+import uuid
+
 from .use_model import *
 from . import home_blueprint
 
@@ -14,7 +16,26 @@ def home(search=False, where=False):
     if all_:
         order_by = ufstr.id()
         order_method = 'ASC'
-    result = sql_search("products", ufstr.star(), order_by=order_by, order_method=order_method, fetch="all", where=where, where_value=search, like=True)
+    result = sql_search("products", ufstr.star(), order_by=order_by, order_method=order_method, fetch="all",
+                        where=where, where_value=search, like=True)
+    if current_user.is_authenticated:
+        result2 = sql_search(ufstr.suggest_order(), ufstr.star(), ufstr.user_id(), current_user.id)
+        result3 = sql_execute(f'SHOW COLUMNS FROM {ufstr.suggest_order()}')
+        x = []
+        for i in result3:
+            x.append(i[0])
+        y = []
+        for i in range(len(result3)):
+            z = [result2[i], x[i]]
+            y.append(z)
+        y.sort(key=lambda x: x[0], reverse=True)
+        first_col = y[0][1]
+        result = sql_search('products', ufstr.star(), ufstr.product_type(), ufstr.db_string(first_col),
+                            fetch=ufstr.all())
+        search = sql_execute(f'select * from products where product_type != {ufstr.db_string(first_col)} order by hot desc')
+        for i in search:
+            result.append(i)
+
     product_list = []
     for i in result:
         product = []
@@ -39,10 +60,14 @@ def home(search=False, where=False):
         cart_num = len(sql_search('cart', "*", 'user_id', current_user.id, fetch='all'))
         login = 1
     if len(product_list) == 0:
-        info = f'沒有 "{search.split("%")[1]}" 的相關產品'
+        if search:
+            info = f'沒有 "{search.split("%")[1]}" 的相關產品'
+        else:
+            info = ''
     else:
-        info = 0
-    return render_template('home.html', product_list=product_list, cart_num=cart_num, admin=admin, login=login, info=info)
+        info = ''
+    return render_template('home.html', product_list=product_list, cart_num=cart_num, admin=admin, login=login,
+                           info=info)
 
 
 @home_blueprint.route('/search')

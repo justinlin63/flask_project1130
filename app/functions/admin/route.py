@@ -5,10 +5,13 @@ from . import admin_blueprint
 @admin_blueprint.route('/')
 @login_required
 def admin():
-    print(current_user.role)
     if current_user.role == 'admin':
         # 這裡是管理員專屬的功能頁面
-        return render_template("admin.html")
+        product_type = sql_execute("SHOW COLUMNS FROM suggest_order")
+        type_list = []
+        for i in product_type[1:]:
+            type_list.append(i[0])
+        return render_template("admin.html", types=type_list)
     return redirect('/')
 
 
@@ -19,9 +22,11 @@ def product_add():
         if request.method == 'POST':
             input_name = request.form['name']
             input_price = request.form['price']
-            sql_insert(ufstr.products(), 'name,price,hot,product_order', f'{ufstr.db_string(input_name)},{input_price},1')
+            input_product_type = request.form['type']
+            sql_insert(ufstr.products(), 'name,price,hot,product_type',
+                       f'{ufstr.db_string(input_name)},{input_price},0,{ufstr.db_string(input_product_type)}')
             product_id = sql_search(ufstr.products(), ufstr.id(), ufstr.name(), ufstr.db_string(input_name))
-            print(product_id)
+            sql_insert('media', 'id,file_name', f'{int(product_id)},{ufstr.db_string("_blank.png")}')
             return render_template('product_image.html', product_id=product_id)
         return render_template('admin.html')
 
@@ -34,7 +39,7 @@ def product_image_add():
             img = request.files['file']
             product_id = request.form['product_id']
             upload_folder = path + '/static/product/' + str(img.filename)  # 指定上傳目錄
-            sql_insert('media', 'id,file_name', f'{int(product_id)},{ufstr.db_string(str(img.filename))}')
+            sql_update('media', 'file_name', f'{ufstr.db_string(str(img.filename))}', ufstr.id(), int(product_id))
             img.save(upload_folder)
             return redirect('/')
         return render_template('product_image.html')
@@ -44,8 +49,16 @@ def product_image_add():
 @login_required
 def admin_orders():
     if current_user.role == 'admin':
+        page = request.args.get('page')
+        if not page:
+            page = 1
+        else:
+            page = int(page)
+        start = (page - 1) * limit_per_page
+        end = page * limit_per_page
         user = sql_search(ufstr.orders(), ufstr.star(), fetch=ufstr.all())
         orders = []
+        orders_edit = []
         for info in user:
             if info.status == 'confirm':
                 a = {'order_id': info.id, 'products': []}
@@ -71,7 +84,17 @@ def admin_orders():
                 a['deliver_url'] = '/admin/orders/deliver/' + str(info.id)
                 a['status'] = '待處理'
                 orders.append(a)
-        return render_template('orders.html', orders=orders, admin_bool=1)
+                orders_edit = orders[start:end]
+                next_page = page + 1
+        if page - 1:
+            last_page = page - 1
+        else:
+            last_page = 0
+        if not len(orders_edit) or len(orders_edit) < limit_per_page or orders_edit[-1] == orders[-1]:
+            next_page = 0
+        print(orders_edit)
+        return render_template('orders.html', orders=orders_edit, admin_bool=1, next_page=next_page,
+                               last_page=last_page)
     return redirect('/')
 
 
@@ -79,6 +102,13 @@ def admin_orders():
 @login_required
 def admin_all_orders():
     if current_user.role == 'admin':
+        page = request.args.get('page')
+        if not page:
+            page = 1
+        else:
+            page = int(page)
+        start = (page - 1) * limit_per_page
+        end = page * limit_per_page
         user = sql_search(ufstr.orders(), ufstr.star(), fetch=ufstr.all())
         orders = []
         for info in user:
@@ -114,7 +144,16 @@ def admin_all_orders():
                 r = '商家已取消'
             a['status'] = r
             orders.append(a)
-        return render_template('orders.html', orders=orders, all_bool=1)
+        orders.reverse()
+        orders_edit = orders[start:end]
+        next_page = page + 1
+        if page - 1:
+            last_page = page - 1
+        else:
+            last_page = 0
+        if not len(orders_edit) or len(orders_edit) < limit_per_page or orders_edit[-1] == orders[-1]:
+            next_page = 0
+        return render_template('orders.html', orders=orders_edit, all_bool=1, next_page=next_page, last_page=last_page)
 
 
 @admin_blueprint.route('/orders/cancel/<int:id>')
@@ -153,7 +192,7 @@ def orders_deliver(id):
 @login_required
 def admin_search():
     if current_user.role == 'admin':
-        result = sql_execute_search("SHOW TABLES")
+        result = sql_execute("SHOW TABLES")
         tables = [row[0] for row in result]
         return render_template('admin_search.html', tables=tables)
 
@@ -163,7 +202,7 @@ def admin_search():
 def admin_search_get_columns():
     selected_table = request.args.get('table')
     if current_user.role == 'admin':
-        result = sql_execute_search("SHOW COLUMNS FROM {}".format(selected_table))
+        result = sql_execute("SHOW COLUMNS FROM {}".format(selected_table))
         columns = [row[0] for row in result]
         return jsonify(columns)
 
@@ -173,7 +212,7 @@ def admin_search_get_columns():
 def admin_search_get_category(category):
     if current_user.role == 'admin':
         selected_table = request.args.get('table')
-        result = sql_execute_search("SELECT {} FROM {}".format(category, selected_table))
+        result = sql_execute("SELECT {} FROM {}".format(category, selected_table))
         category = [row[0] for row in result]
         category.sort()
         return jsonify(category)
@@ -187,8 +226,15 @@ def admin_search_result():
         selected_category = request.form.get('category')
         selected_column = request.form.get('columns')
         selected_item = request.form.get('item')
-        # 使用選擇的值查詢 MySQL 數據
-        results = sql_execute_search("SELECT {} FROM {} WHERE {} = {}".format(selected_column, selected_table, selected_category, f'"{selected_item}"'))
+        selected_list = [selected_column, selected_item, selected_category, selected_table]
+        print(selected_list)
+        if '' not in selected_list:
+            # 使用選擇的值查詢 MySQL 數據
+            results = sql_execute(
+                "SELECT {} FROM {} WHERE {} = {}".format(selected_column, selected_table, selected_category,
+                                                         f'"{selected_item}"'))
+        else:
+            results = 0
         return render_template('admin_search_result.html', selected_table=selected_table,
                                selected_category=selected_category, selected_columns=selected_column,
                                results=results)
@@ -199,9 +245,8 @@ def admin_search_result():
 def add_money():
     if request.method == 'POST':
         username = request.form['username']
-        print(username)
         money = request.form['money']
-        result = sql_search(ufstr.users(), ufstr.star(), ufstr.username(), username)
+        result = sql_search(ufstr.users(), ufstr.star(), ufstr.username(), ufstr.db_string(username))
         if result:
             money = int(money) + int(result.money)
         else:

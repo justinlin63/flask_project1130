@@ -31,8 +31,8 @@ class String:
         return "products"
 
     @staticmethod
-    def product_order():
-        return 'product_order'
+    def suggest_order():
+        return 'suggest_order'
 
     @staticmethod
     def password():
@@ -57,6 +57,10 @@ class String:
     @staticmethod
     def hot():
         return "hot"
+
+    @staticmethod
+    def product_type():
+        return "product_type"
 
     @staticmethod
     def onr():

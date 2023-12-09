@@ -12,7 +12,7 @@
     }
 
     .container {
-      max-width: 800px;
+      max-width: 1000px;
       margin: 50px auto;
     }
 
@@ -83,7 +83,7 @@
           {% endif %}
           <th>總價</th>
           <th>狀態</th>
-          <th>操作</th>   
+          <th>操作</th>
         </tr>
       </thead>
       <tbody>
@@ -125,13 +125,32 @@
     </table>
     <div class="text-center">
       {% if all_bool %}
-      <a href="/admin/orders" class="btn btn-primary">回發貨管理</a>
-      <a href="/" class="btn btn-primary">回首頁</a>
+        {% if last_page %}
+          <a href="/admin/orders/all?page={{last_page}}" class="btn btn-primary">上一頁</a>
+        {% endif %}
+        {% if next_page %}
+          <a href="/admin/orders/all?page={{next_page}}" class="btn btn-primary">下一頁</a>
+        {% endif %}
+        <a href="/admin/orders" class="btn btn-primary">回發貨管理</a>
+        <a href="/" class="btn btn-primary">回首頁</a>
       {% else %}
         {% if admin_bool %}
-        <a href="/admin/orders/all" class="btn btn-primary">全部訂單</a>
+          {% if last_page %}
+            <a href="/admin/orders?page={{last_page}}" class="btn btn-primary">上一頁</a>
+          {% endif %}
+          {% if next_page %}
+            <a href="/admin/orders?page={{next_page}}" class="btn btn-primary">下一頁</a>
+          {% endif %}
+            <a href="/admin/orders/all" class="btn btn-primary">全部訂單</a>
+        {% else %}
+          {% if last_page %}
+            <a href="/orders?page={{last_page}}" class="btn btn-primary">上一頁</a>
+          {% endif %}
+          {% if next_page %}
+            <a href="/orders?page={{next_page}}" class="btn btn-primary">下一頁</a>
+          {% endif %}
         {% endif %}
-      <a href="/" class="btn btn-primary">回首頁</a>
+        <a href="/" class="btn btn-primary">回首頁</a>
       {% endif %}
     </div>
   </div>
