@@ -1,8 +1,9 @@
 from .use_model import *
 from . import login_blueprint
 
-OAUTH2_CLIENT_ID = '981780266026680360'
-OAUTH2_CLIENT_SECRET = 'hY794PLJOhj4aQ4dk237NTL8nvMVwVPN'
+OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID')
+print(OAUTH2_CLIENT_ID)
+OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET')
 OAUTH2_REDIRECT_URI = 'http://2306testflask.ddns.net/login/discord/callback'
 
 API_BASE_URL = os.environ.get('API_BASE_URL', 'https://discordapp.com/api')
@@ -33,8 +34,8 @@ def make_session(token=None, state=None, scope=None):
 
 
 google_blueprint = make_google_blueprint(
-    client_id="1090587497330-6p6i1m8o6pmueqi14h1a3hooneojkkb7.apps.googleusercontent.com",
-    client_secret="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",
+    client_id=os.environ.get('client_id'),
+    client_secret=os.environ.get('client_secret'),
     scope=["https://www.googleapis.com/auth/userinfo.email", "openid",
            "https://www.googleapis.com/auth/userinfo.profile"],
     redirect_url='/login'
