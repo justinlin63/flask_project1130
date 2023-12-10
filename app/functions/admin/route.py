@@ -195,6 +195,7 @@ def admin_search():
         result = sql_execute("SHOW TABLES")
         tables = [row[0] for row in result]
         return render_template('admin_search.html', tables=tables)
+    return redirect('/')
 
 
 @admin_blueprint.route('/search/get_columns')
@@ -218,26 +219,61 @@ def admin_search_get_category(category):
         return jsonify(category)
 
 
-@admin_blueprint.route('/search/result', methods=['POST'])
+@admin_blueprint.route('/search/result', methods=['GET', 'POST'])
 @login_required
 def admin_search_result():
-    if current_user.role == 'admin':
-        selected_table = request.form.get('table')
-        selected_category = request.form.get('category')
-        selected_column = request.form.get('columns')
-        selected_item = request.form.get('item')
-        selected_list = [selected_column, selected_item, selected_category, selected_table]
-        print(selected_list)
-        if '' not in selected_list:
-            # 使用選擇的值查詢 MySQL 數據
-            results = sql_execute(
-                "SELECT {} FROM {} WHERE {} = {}".format(selected_column, selected_table, selected_category,
-                                                         f'"{selected_item}"'))
-        else:
-            results = 0
-        return render_template('admin_search_result.html', selected_table=selected_table,
-                               selected_category=selected_category, selected_columns=selected_column,
-                               results=results)
+    if request.method == 'POST':
+        if current_user.role == 'admin':
+            selected_table = request.form.get('table')
+            selected_category = request.form.get('category')
+            selected_column = request.form.get('columns')
+            selected_item = request.form.get('item')
+            selected_list = [selected_column, selected_item, selected_category, selected_table]
+            if '' not in selected_list:
+                # 使用選擇的值查詢 MySQL 數據
+                results = sql_search(selected_table, selected_column,
+                                     selected_category, ufstr.db_string(selected_item), fetch='all')
+                id = sql_search(selected_table, ufstr.id(),
+                                selected_category, ufstr.db_string(selected_item), fetch='one')
+            else:
+                results = 0
+            return render_template('admin_search_result.html', selected_table=selected_table,
+                                   selected_category=selected_category, selected_columns=selected_column,
+                                   results=results, id=id)
+    return redirect('/admin/search')
+
+
+@admin_blueprint.route('/search/modify', methods=['GET', 'POST'])
+def admin_search_modify():
+    if request.method == 'POST':
+        if current_user.role == 'admin':
+            selected_table = request.form.get('selected_table')
+            selected_category = request.form.get('selected_category')
+            selected_columns = request.form.get('selected_columns')
+            change_value = request.form.get('change_value')
+            id = request.form.get('id')
+            selected_list = [selected_table, selected_columns, change_value, selected_category]
+            if '' not in selected_list:
+                try:
+                    int(change_value)
+                except Exception:
+                    change_value = ufstr.db_string(change_value)
+                sql_update(selected_table, selected_columns, change_value, ufstr.id(), id)
+    return redirect('/admin/search')
+
+
+@admin_blueprint.route('/search/delete', methods=['GET', 'POST'])
+def admin_search_delete():
+    if request.method == 'POST':
+        if current_user.role == 'admin':
+            selected_table = request.form.get('selected_table')
+            selected_category = request.form.get('selected_category')
+            selected_columns = request.form.get('selected_columns')
+            id = request.form.get('id')
+            selected_list = [selected_table, selected_columns, selected_category, id]
+            if '' not in selected_list:
+                sql_delete(selected_table, ufstr.id(), id)
+        return redirect('/admin/search')
 
 
 @admin_blueprint.route('/money', methods=['GET', 'POST'])

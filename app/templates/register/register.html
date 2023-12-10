@@ -30,7 +30,11 @@
 
                 <div class="mb-3">
                     <label for="email" class="form-label">電子郵件:</label>
-                    <input type="email" id="email" name="email" required class="form-control">
+                    {% if email %}
+                        <input type="email" id="email" name="email" value="{{email}}" required class="form-control" readonly>
+                    {% else %}
+                        <input type="email" id="email" name="email" required class="form-control">
+                    {% endif %}
                 </div>
 
                 <div class="text-center">

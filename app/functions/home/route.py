@@ -32,10 +32,14 @@ def home(search=False, where=False):
         first_col = y[0][1]
         result = sql_search('products', ufstr.star(), ufstr.product_type(), ufstr.db_string(first_col),
                             fetch=ufstr.all())
-        search = sql_execute(f'select * from products where product_type != {ufstr.db_string(first_col)} order by hot desc')
+        search = sql_execute(
+            f'select * from products where product_type != {ufstr.db_string(first_col)} order by hot desc')
         for i in search:
             result.append(i)
 
+    session.pop('google_oauth_token', None)
+    session.pop('oauth2_token', None)
+    session.pop('email', None)
     product_list = []
     for i in result:
         product = []

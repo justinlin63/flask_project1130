@@ -1,3 +1,5 @@
+import json
+
 from .use_model import *
 from . import pay_blueprint
 
@@ -20,17 +22,19 @@ def generate_refund_bill(to_user_id, money):
     sql_update('users', 'money', store_money, 'username', '"store"')
 
 
-@pay_blueprint.route('/token/<token>')
+@pay_blueprint.route('/token/<token>', methods=['GET', 'POST'])
 @login_required
 def pay(token):
-    result = sql_search('users', 'money', 'id', current_user.id)
-    bill = sql_search('pay_list', '*', 'token', f'{ufstr.db_string(token)}', 'one')
-    if bill:
-        if result >= bill[4] and bill[8] == 'ok':
-            return redirect(f'/pay/check/{token}')
-        elif result < bill[4] and bill[8] == 'ok':
-            return redirect('/redirect/餘額不足')
-    return redirect('/redirect/wrong')
+    if request.method == 'POST':
+        result = sql_search('users', 'money', 'id', current_user.id)
+        bill = sql_search('pay_list', '*', 'token', f'{ufstr.db_string(token)}', 'one')
+        if bill:
+            if result >= bill[4] and bill[8] == 'ok':
+                return redirect(f'/pay/check/{token}')
+            elif result < bill[4] and bill[8] == 'ok':
+                return redirect('/redirect/餘額不足')
+        return redirect('/redirect/wrong')
+    return render_template('payment.html', token=token, ip=ip, port=port)
 
 
 @pay_blueprint.route('/check/<token>', methods=['GET', 'POST'])
@@ -62,7 +66,8 @@ def check(token):
                                 hot = result4.hot
                                 hot = int(hot) + int(quantity)
                                 sql_update(ufstr.products(), ufstr.hot(), hot, ufstr.id(), cart)
-                                sql_update(ufstr.suggest_order(), result4.product_type, f'{result4.product_type}+1', ufstr.user_id(),
+                                sql_update(ufstr.suggest_order(), result4.product_type, f'{result4.product_type}+1',
+                                           ufstr.user_id(),
                                            bill.user_id)
                 sql_delete('cart', 'user_id', current_user.id)
                 return redirect('/orders')
@@ -73,3 +78,53 @@ def check(token):
     if bill:
         return render_template('pay.html', total=bill.money, token=token)
     return redirect('/redirect/錯誤')
+
+
+@pay_blueprint.route('/token/fp/<token>')
+@login_required
+def fp(token):
+    bill = sql_search('pay_list', '*', 'token', f'{ufstr.db_string(token)}', 'one')
+    if bill:
+        data = {'token': token, 'money': bill.money, 'uid': uid, 'key': key}
+        res = requests.post(f'http://{fp_ip}:5001/api/bill', json=data)
+        if res.status_code == 200:
+            rel = res.json()
+            rel = json.loads(rel)
+            if 'error' not in rel and rel['do'] == 'add_bill' and rel['status'] == "success":
+                return redirect(f'http://{fp_ip}:5001/pay/token/{token}')
+            else:
+                return redirect('/redirect/錯誤1')
+        else:
+            return redirect('/redirect/錯誤2')
+    return redirect('/redirect/錯誤3')
+
+
+@pay_blueprint.route('/fp/callback', methods=['POST'])
+def fp_callback():
+    result = request.get_json()
+    token = result['token']
+    user = sql_search(ufstr.pay_list(), ufstr.star(), ufstr.token(), ufstr.db_string(token))
+    user_id = user.user_id
+    username = sql_search(ufstr.users(), ufstr.username(), ufstr.id(), user_id)
+    bill = sql_search('pay_list', '*', 'token', f'"{token}"', 'one')
+    if bill.status == 'ok':
+        sql_update('pay_list', 'status', '"used"', 'id', bill.id)
+        sql_insert('orders', 'username,product_id,quantity,status',
+                   f'{ufstr.db_string(username)},"{bill.cart}","{bill.quantity}","confirm"')
+        result3 = sql_search("cart", where="user_id", where_value=f'{user_id}', fetch="all")
+        if result3:
+            if len(result3):
+                for i in result3:
+                    cart = i.cart
+                    quantity = i.quantity
+                    result4 = sql_search(ufstr.products(), ufstr.star(), ufstr.id(), cart)
+                    if result4:
+                        hot = result4.hot
+                        hot = int(hot) + int(quantity)
+                        sql_update(ufstr.products(), ufstr.hot(), hot, ufstr.id(), cart)
+                        sql_update(ufstr.suggest_order(), result4.product_type, f'{result4.product_type}+1',
+                                   ufstr.user_id(),
+                                   bill.user_id)
+        sql_delete('cart', 'user_id', user_id)
+        return redirect('/orders')
+    return 'ok'

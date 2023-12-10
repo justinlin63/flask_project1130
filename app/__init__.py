@@ -9,6 +9,7 @@ from flask_login import LoginManager
 def create_app():
     app = Flask(__name__, static_folder=path + 'static')
     app.config['SECRET_KEY'] = urandom(16)
+    app.config["DANCE_OAUTH2_HTTP_URL"] = True
     register_blueprints(app)
     login_manager = LoginManager()
     login_manager.init_app(app)

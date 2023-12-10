@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>查詢結果 </title>
+    <title>查詢結果</title>
     <!-- Bootstrap CSS link -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -24,8 +24,23 @@
             border: 1px solid #ddd;
             text-align: center;
         }
+        .container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .lead {
+            margin-bottom: 10px;
+        }
+        .btn-return {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .input-field {
+            width: 150PX; /* 根据需要调整宽度 */
+            margin: 0 auto; /* 在水平方向上居中输入框 */
+        }
     </style>
-    
 </head>
 <body class="bg-light">
     <div class="container mt-4">
@@ -50,7 +65,6 @@
                     <th>{{ selected_columns }}</th>
                 </tr>
             </thead>
-
             <tbody>
                 {% for row in results %}
                     <tr>
@@ -60,19 +74,33 @@
                     </tr>
                 {% endfor %}
             </tbody>
-
+            {% else %}
+                <h5 class="text-center">無</h5>
+            {% endif %}
         </table>
-        {% else %}
-            <h5 style="text-align:center">無</h5>
-        {% endif %}
 
-        <form action="/admin/search">
-            <div class="text-center">
-                <input type="submit" class="btn btn-primary" value="回上頁" style="text-align:center">
-            </div>
-
-
+        <form action="/admin/search/modify" class="input-field text-center mb-3" method="post">
+            <input type="hidden" name="selected_table" value="{{selected_table}}">
+            <input type="hidden" name="selected_category" value="{{selected_category}}">
+            <input type="hidden" name="selected_columns" value="{{selected_columns}}">
+            <input type="hidden" name="id" value="{{id}}">
+            <input type="text" name="change_value" class="form-control text-center mb-2" placeholder="輸入要更改的值">
+            <input type="submit" class="btn btn-primary align-middle" value="更改">
         </form>
+
+        <form action="/admin/search/delete" class="input-field text-center" method="post">
+            <input type="hidden" name="selected_table" value="{{selected_table}}">
+            <input type="hidden" name="selected_category" value="{{selected_category}}">
+            <input type="hidden" name="selected_columns" value="{{selected_columns}}">
+            <input type="hidden" name="id" value="{{id}}">
+            <input type="submit" class="btn btn-danger align-middle" value="刪除">
+        </form>
+
+        <div class="btn-return">
+            <form action="/admin/search">
+                <input type="submit" class="btn btn-secondary" value="回上頁">
+            </form>
+        </div>
     </div>
 
     <!-- Bootstrap JS and Popper.js scripts (required for some Bootstrap features) -->

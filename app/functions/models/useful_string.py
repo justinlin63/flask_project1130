@@ -79,6 +79,14 @@ class String:
         return "reset_password_token"
 
     @staticmethod
+    def token():
+        return "token"
+
+    @staticmethod
+    def email():
+        return "email"
+
+    @staticmethod
     def star():
         return "*"
 
