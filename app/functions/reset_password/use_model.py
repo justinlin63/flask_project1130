@@ -7,3 +7,4 @@ from email.mime.multipart import MIMEMultipart
 from app.functions.models.sql_connect import *
 from app.functions.models.useful_string import *
 from app.config import ip
+import os

@@ -59,7 +59,7 @@ def sql_update(table: str, columns: str, value, where: str, where_value):
                      password=Configs.password, use_pure=True) as conn:
             cursor = conn.cursor()
             query = f'UPDATE {table} SET {columns} = {value} WHERE {where} = {where_value}'
-            print(query)
+            # print(query)
             cursor.execute(query)
             conn.commit()
             return True

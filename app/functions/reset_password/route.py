@@ -1,9 +1,9 @@
 from .use_model import *
 from . import reset_password_blueprint
 
-sender_email = "ggfewi20@gmail.com"
+sender_email = os.environ.get('SENDER_EMAIL')
 receiver_email = ""
-password = "wsgnfncjfeuvzhbv"
+password = os.environ.get('email_PASSWORD')
 
 
 @reset_password_blueprint.route('/password', methods=['GET', 'POST'])
