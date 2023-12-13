@@ -6,12 +6,7 @@ from . import admin_blueprint
 @login_required
 def admin():
     if current_user.role == 'admin':
-        # 這裡是管理員專屬的功能頁面
-        product_type = sql_execute("SHOW COLUMNS FROM suggest_order")
-        type_list = []
-        for i in product_type[1:]:
-            type_list.append(i[0])
-        return render_template("admin.html", types=type_list)
+        return render_template("admin.html")
     return redirect('/')
 
 
@@ -28,7 +23,11 @@ def product_add():
             product_id = sql_search(ufstr.products(), ufstr.id(), ufstr.name(), ufstr.db_string(input_name))
             sql_insert('media', 'id,file_name', f'{int(product_id)},{ufstr.db_string("_blank.png")}')
             return render_template('product_image.html', product_id=product_id)
-        return render_template('admin.html')
+        product_type = sql_execute("SHOW COLUMNS FROM suggest_order")
+        type_list = []
+        for i in product_type[1:]:
+            type_list.append(i[0])
+        return render_template('product_add.html', types=type_list)
 
 
 @admin_blueprint.route('/product/add/image', methods=['get', 'post'])
@@ -278,14 +277,16 @@ def admin_search_delete():
 @admin_blueprint.route('/money', methods=['GET', 'POST'])
 @login_required
 def add_money():
-    if request.method == 'POST':
-        username = request.form['username']
-        money = request.form['money']
-        result = sql_search(ufstr.users(), ufstr.star(), ufstr.username(), ufstr.db_string(username))
-        if result:
-            money = int(money) + int(result.money)
-        else:
-            return redirect('/redirect/錯誤')
-        sql_update(ufstr.users(), ufstr.money(), money, ufstr.username(), ufstr.db_string(username))
-        return redirect('/redirect/增加成功')
-    return redirect('/redirect/錯誤')
+    if current_user.role == 'admin':
+        if request.method == 'POST':
+            username = request.form['username']
+            money = request.form['money']
+            result = sql_search(ufstr.users(), ufstr.star(), ufstr.username(), ufstr.db_string(username))
+            if result:
+                money = int(money) + int(result.money)
+            else:
+                return redirect('/redirect/錯誤')
+            sql_update(ufstr.users(), ufstr.money(), money, ufstr.username(), ufstr.db_string(username))
+            return redirect('/redirect/增加成功')
+        return render_template('money_add.html')
+    return redirect('/')
