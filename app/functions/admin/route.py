@@ -92,7 +92,6 @@ def admin_orders():
             last_page = 0
         if not len(orders_edit) or len(orders_edit) < limit_per_page or orders_edit[-1] == orders[-1]:
             next_page = 0
-        print(orders_edit)
         return render_template('orders.html', orders=orders_edit, admin_bool=1, next_page=next_page,
                                last_page=last_page)
     return redirect('/')

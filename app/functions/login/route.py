@@ -2,7 +2,6 @@ from .use_model import *
 from . import login_blueprint
 
 OAUTH2_CLIENT_ID = os.environ.get('OAUTH2_CLIENT_ID')
-print(OAUTH2_CLIENT_ID)
 OAUTH2_CLIENT_SECRET = os.environ.get('OAUTH2_CLIENT_SECRET')
 OAUTH2_REDIRECT_URI = 'http://2306testflask.ddns.net/login/discord/callback'
 
